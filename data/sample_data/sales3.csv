@@ -1,0 +1,51 @@
+Transaction ID,Product Name,Category,Price (USD),Quantity,Customer Age,Purchase Date,Payment Method,Discount (%),Region
+1,Laptop,Electronics,999,1,28,01-12-2024,Credit Card,10,North America
+2,Smartphone,Electronics,599,2,35,02-12-2024,Cash,5,Europe
+3,Desk Chair,Furniture,120,1,44,03-12-2022,Debit Card,15,Asia
+4,Headphones,Electronics,80,3,22,04-12-2022,Online Payment,0,South America
+5,Notebook,Stationery,5,10,19,15-12-2022,Cash,0,Africa
+6,T-shirt,Clothing,25,4,30,06-12-2024,Debit Card,20,Europe
+7,Running Shoes,Footwear,60,1,45,07-12-2023,Credit Card,5,Asia
+8,Smartwatch,Electronics,150,2,31,08-12-2024,Online Payment,10,North America
+9,Blender,Appliances,50,1,39,02-12-2024,Cash,25,South America
+10,Jeans,Clothing,40,3,24,10-12-2024,Debit Card,15,Europe
+11,Coffee Maker,Appliances,75,1,40,11-12-2024,Credit Card,10,Asia
+12,Backpack,Accessories,35,2,26,12-12-2024,Online Payment,20,North America
+13,Sneakers,Footwear,50,1,37,13-12-2024,Cash,5,Europe
+14,Monitor,Electronics,200,1,29,14-12-2024,Debit Card,15,Asia
+15,Refrigerator,Appliances,700,1,50,15-12-2024,Online Payment,5,South America
+16,Oven,Appliances,150,1,36,16-12-2024,Credit Card,10,Africa
+17,Hoodie,Clothing,30,2,25,17-12-2024,Cash,20,Europe
+18,Air Fryer,Appliances,130,1,41,18-12-2024,Debit Card,10,North America
+19,Water Bottle,Accessories,15,5,20,19-12-2024,Online Payment,0,Asia
+20,Watch,Accessories,120,1,34,20-12-2024,Credit Card,25,South America
+21,Microwave,Appliances,250,1,39,21-12-2024,Debit Card,15,North America
+22,Pen Set,Stationery,10,6,18,22-05-2024,Cash,5,Europe
+23,Sofa,Furniture,450,1,48,23-12-2024,Credit Card,10,Asia
+24,Bedding Set,Home & Living,80,1,29,24-02-2024,Online Payment,15,North America
+25,Basketball,Sports,25,3,32,25-12-2024,Debit Card,5,South America
+26,Tea Kettle,Appliances,40,1,27,25-12-2024,Cash,10,Africa
+27,Jacket,Clothing,75,2,30,25-11-2023,Credit Card,20,Europe
+28,Wireless Mouse,Electronics,25,2,24,28-12-2024,Debit Card,10,Asia
+29,Tablet,Electronics,350,1,33,29-12-2024,Online Payment,15,North America
+30,Bookshelf,Furniture,120,1,42,30-12-2024,Cash,0,Europe
+31,Gloves,Clothing,15,5,27,31-12-2024,Credit Card,10,Asia
+32,Suitcase,Accessories,80,1,35,01-01-2025,Online Payment,15,North America
+33,Action Camera,Electronics,250,1,31,02-01-2025,Cash,20,South America
+34,Curtains,Home & Living,40,2,26,03-01-2025,Debit Card,5,Europe
+35,Paint Set,Stationery,20,3,21,04-01-2025,Credit Card,10,Africa
+36,Cap,Clothing,15,6,22,05-01-2025,Online Payment,0,Asia
+37,Bicycle,Sports,350,1,40,06-01-2025,Debit Card,10,North America
+38,Lamp,Furniture,45,2,30,07-01-2025,Cash,15,Europe
+39,Vacuum Cleaner,Appliances,100,1,44,08-01-2025,Credit Card,5,Asia
+40,Sunglasses,Accessories,35,3,33,09-01-2025,Online Payment,10,South America
+41,Pillow,Home & Living,20,4,38,10-01-2025,Cash,5,Africa
+42,Tablet Stand,Electronics,25,2,29,11-01-2025,Debit Card,20,Europe
+43,Yoga Mat,Sports,25,1,31,12-01-2025,Online Payment,10,Asia
+44,Desk Lamp,Furniture,60,1,28,13-01-2025,Credit Card,15,North America
+45,Cookbook,Books,15,3,42,14-01-2025,Cash,0,South America
+46,Gaming Console,Electronics,300,1,22,15-01-2025,Debit Card,20,Europe
+47,Coffee Table,Furniture,150,1,39,16-01-2025,Online Payment,5,Asia
+48,Blanket,Home & Living,50,1,36,17-01-2025,Credit Card,10,North America
+49,Tripod,Accessories,40,1,25,18-01-2023,Debit Card,15,Europe
+50,Rice Cooker,Appliances,90,1,29,19-01-2025,Online Payment,20,Asia

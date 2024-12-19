@@ -1,0 +1,31 @@
+OrderID,Product,Category,Region,Year,Quantity,UnitPrice,TotalSales,Salesperson,CustomerType
+1001,Laptop,Electronics,North,2024,5,800,4000,John Doe,Retail
+1002,Smartphone,Electronics,South,2024,10,500,5000,Jane Smith,Wholesale
+1003,Desk Chair,Furniture,East,2024,7,150,1050,Alex Brown,Retail
+1004,Notebook,Stationery,West,2024,50,3,150,Sara White,Retail
+1005,Tablet,Electronics,North,2024,8,300,2400,Mike Green,Wholesale
+1006,Office Desk,Furniture,South,2024,3,450,1350,John Doe,Retail
+1007,Printer,Electronics,East,2024,4,200,800,Jane Smith,Wholesale
+1008,Pen Pack,Stationery,West,2024,100,1,100,Alex Brown,Retail
+1009,Monitor,Electronics,North,2024,6,180,1080,Sara White,Retail
+1010,Filing Cabinet,Furniture,South,2024,2,600,1200,Mike Green,Wholesale
+1011,Keyboard,Electronics,East,2023,9,100,900,John Doe,Retail
+1012,Mouse,Electronics,South,2023,12,50,600,Jane Smith,Wholesale
+1013,Sofa,Furniture,North,2023,4,1000,4000,Alex Brown,Retail
+1014,Desk Lamp,Furniture,East,2023,8,75,600,Sara White,Retail
+1015,Smartwatch,Electronics,West,2023,3,200,600,Mike Green,Wholesale
+1016,Headphones,Electronics,North,2025,6,100,600,John Doe,Retail
+1017,Coffee Maker,Appliances,South,2025,7,120,840,Jane Smith,Retail
+1018,Vacuum Cleaner,Appliances,East,2025,5,150,750,Alex Brown,Wholesale
+1019,Gaming Console,Electronics,North,2025,4,500,2000,Sara White,Retail
+1020,TV,Electronics,South,2025,3,1000,3000,Mike Green,Wholesale
+1021,Blender,Appliances,East,2024,6,90,540,John Doe,Retail
+1022,Dishwasher,Appliances,North,2024,4,500,2000,Jane Smith,Wholesale
+1023,Refrigerator,Appliances,West,2024,2,1000,2000,Mike Green,Retail
+1024,Bookshelf,Furniture,South,2024,3,250,750,Sara White,Retail
+1025,Outdoor Grill,Appliances,East,2025,5,400,2000,Alex Brown,Wholesale
+1026,Water Heater,Appliances,North,2024,4,300,1200,Mike Green,Retail
+1027,Fan,Appliances,West,2023,8,50,400,Jane Smith,Retail
+1028,Toaster,Appliances,North,2025,6,40,240,John Doe,Wholesale
+1029,Blender,Appliances,East,2023,5,100,500,Mike Green,Retail
+1030,Electric Heater,Appliances,South,2024,4,150,600,Sara White,Wholesale

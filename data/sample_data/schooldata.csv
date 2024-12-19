@@ -1,0 +1,41 @@
+StudentID,Name,Age,Grade,Year,Subject,Score,Attendance (%),Extracurricular Activity,Gender
+2001,Alice Smith,20,12,2023,Mathematics,85,95,Basketball,Female
+2002,Bob Johnson,22,11,2023,Science,88,92,Debate Club,Male
+2003,Carol Davis,21,10,2023,History,91,96,Drama Club,Female
+2004,David Wilson,23,12,2023,Mathematics,78,89,Football,Male
+2005,Emma Martinez,20,9,2023,English,86,94,Debate Club,Female
+2006,Frank Thomas,21,10,2024,Science,90,97,Basketball,Male
+2007,Grace Lee,22,12,2024,Mathematics,83,93,Drama Club,Female
+2008,Henry Garcia,23,11,2024,History,75,91,Music Club,Male
+2009,Isabella Moore,20,10,2024,English,92,98,Volleyball,Female
+2010,James Anderson,19,11,2025,Science,86,96,Football,Male
+2011,Julia Harris,22,12,2025,History,89,97,Drama Club,Female
+2012,Kevin Walker,23,10,2025,Mathematics,80,92,Basketball,Male
+2013,Laura King,20,9,2023,Science,88,91,Volleyball,Female
+2014,Mason Scott,19,11,2023,English,91,94,Debate Club,Male
+2015,Mia Carter,21,9,2023,History,93,96,Drama Club,Female
+2016,Noah Green,22,12,2024,Mathematics,84,92,Music Club,Male
+2017,Olivia Evans,23,11,2024,Science,79,93,Basketball,Female
+2018,Peter Adams,20,12,2024,English,87,97,Volleyball,Male
+2019,Quinn Carter,22,10,2025,History,82,95,Debate Club,Female
+2020,Ryan Bell,21,11,2025,Mathematics,89,96,Basketball,Male
+2021,Samantha Gray,20,10,2023,English,91,94,Drama Club,Female
+2022,Sean White,23,12,2023,Science,85,95,Debate Club,Male
+2023,Sophia Perry,22,10,2024,History,92,97,Volleyball,Female
+2024,Steven Harris,21,11,2025,Mathematics,78,96,Music Club,Male
+2025,Taylor Scott,20,9,2023,Science,80,92,Basketball,Female
+2026,Thomas Young,22,10,2023,History,88,93,Volleyball,Male
+2027,Vanessa Hall,19,11,2024,Science,90,96,Debate Club,Female
+2028,William King,20,10,2025,English,84,97,Basketball,Male
+2029,Zoe Martinez,21,9,2025,History,85,92,Music Club,Female
+2030,Aiden Miller,22,12,2023,Mathematics,91,98,Volleyball,Male
+2031,Abigail Wilson,19,11,2024,English,86,94,Debate Club,Female
+2032,Elijah Carter,22,12,2024,History,87,97,Basketball,Male
+2033,Hannah Brooks,20,10,2023,Mathematics,93,95,Drama Club,Female
+2034,Isaac Carter,23,11,2025,Science,81,92,Debate Club,Male
+2035,Ivy Powell,22,10,2024,English,88,96,Basketball,Female
+2036,Jake Lewis,23,12,2025,History,90,95,Volleyball,Male
+2037,Lily Gray,20,12,2024,Science,82,97,Debate Club,Female
+2038,Max Hunter,21,10,2023,Mathematics,92,96,Basketball,Male
+2039,Mia Robinson,22,9,2024,History,88,93,Volleyball,Female
+2040,Nathan Brooks,19,10,2023,English,89,94,Debate Club,Male
