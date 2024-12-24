@@ -9,7 +9,7 @@ import google.generativeai as genai
 visualization_blueprint = Blueprint('visualizations',__name__)
 
 #load the csv from the data folder
-csv_path = os.path.abspath("../data/sample_data/sales3.csv")
+csv_path = os.path.abspath("../data/sample_data/sales_data.csv")
 df = pd.read_csv(csv_path)
 schema = [{"name": col, "type": str(df[col].dtype)} for col in df.columns]
 
@@ -25,16 +25,18 @@ def recommend_visualizations(schema):
     2. Columns to be used
     3. Potential insights
 
-    suggest 2 bar and 2 pie charts and 2 line chart
+    suggest exactly 2 bar and 2 pie charts and 2 line chart
     include atleast 1 pie chart but should have only one column for pie chart,(it need not be numeric, string colums are also fine if they would make a good pie chart)
-    IMPORTANT:give the column names exactly as it is
+    IMPORTANT:give the column names exactly as they are. NO ADDING ANYTHING EXTRA!!
+    IMPORTANT: if y_column is average give y_col_type:"Avg" if sum "sum"
     IMPORTANT: Respond ONLY in the exact JSON format specified:
     {{
         "visualizations": [
             {{
                 "chart_type": "...",
                 "columns": ["...", "..."],
-                "insights": "..."
+                "insights": "...",
+                "y_col_type":"..."
             }},
             ...
         ]
@@ -113,7 +115,7 @@ def create_chart_configs(recommendation, df):
                         'datasets': [{
                             'label': y_column,
                             'data': grouped_data[y_column].tolist(),
-                            'backgroundColor': 'rgba(54, 162, 235, 0.2)',
+                            'backgroundColor': 'rgba(54, 162, 235, 0.2)','rgba(255, 0, 0, 0.6)'
                             'borderColor': 'rgba(54, 162, 235, 1)',
                             'borderWidth': 1
                         }]
@@ -218,7 +220,7 @@ def create_chart_configs(recommendation, df):
                         grouped_data.columns = [columns[0], 'count']
                         
                     else:
-                        # Numeric column: Use directly (sum is redundant here)
+                        # Numeric column:
                         grouped_data = df[[columns[0]]].value_counts().reset_index()
                         grouped_data.columns = [columns[0], 'count']
                     
@@ -260,18 +262,25 @@ def create_chart_configs(recommendation, df):
 
                 elif len(columns)==2:
                     # Find the first numeric column for values
-                    value_column = numeric_columns[0]
+                    #value_column = numeric_columns[0]
                     
-                    # Group by the first categorical column and sum the numeric column
-                    grouped_data = df.groupby(columns[0])[value_column].sum().reset_index()
+                    x_column = columns[0];
+                    y_column = columns[1];
+                    
+                    
+                    
+                    if viz['y_col_type'] == 'Avg':
+                        grouped_data = df.groupby(x_column)[y_column].mean().reset_index()
+                    else:
+                        grouped_data = df.groupby(x_column)[y_column].sum().reset_index()
                     
                     config = {
                         'chart_type': 'Line',
                         'data': {
-                            'labels': grouped_data[columns[0]].tolist(),
+                            'labels': grouped_data[x_column].tolist(),
                             'datasets': [{
                                 'label': 'Count',  # Add a label
-                                'data': grouped_data[value_column].tolist(),
+                                'data': grouped_data[y_column].tolist(),
                                 'borderColor': 'rgb(75, 192, 192)',
                                 'backgroundColor': 'rgba(75, 192, 192, 0.2)',
                                 'fill': False,
@@ -283,13 +292,21 @@ def create_chart_configs(recommendation, df):
                             'maintainAspectRatio': False,
                             'scales': {
                                 'y': {
-                                    'beginAtZero': True
+                                    'beginAtZero': True,
+                                    'title': {
+                                    'display': True,
+                                    'text': y_column
+                                    }
                                 },
                                 'x': {
                                     'ticks': {
                                         'maxRotation': 45,  # Rotate labels if many
                                         'autoSkip': True,   # Automatically skip some labels if too many
                                         'maxTicksLimit': 10  # Limit number of x-axis ticks
+                                    },
+                                    'title': {
+                                    'display': True,
+                                    'text': x_column
                                     }
                                 }
                             }
