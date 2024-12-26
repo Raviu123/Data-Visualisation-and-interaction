@@ -121,6 +121,7 @@ def create_chart_configs(recommendation, df):
                         }]
                     },
                     'options': {
+                        'indexAxis': 'x',
                         'scales': {
                             'y': {
                                 'beginAtZero': True,
@@ -261,8 +262,7 @@ def create_chart_configs(recommendation, df):
                     
 
                 elif len(columns)==2:
-                    # Find the first numeric column for values
-                    #value_column = numeric_columns[0]
+                    
                     
                     x_column = columns[0];
                     y_column = columns[1];
@@ -315,6 +315,9 @@ def create_chart_configs(recommendation, df):
                     }
                 
                 chart_configs.append(config)
+            
+            #elif chart_type == 'scatter chart':
+
 
 
         
