@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Bar, Pie ,Line } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale,BarElement,ArcElement, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
-
-// Register required Chart.js components
+import { Bar, Pie, Line } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, BarElement, ArcElement, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
+import Card from './Card'
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -17,68 +16,95 @@ ChartJS.register(
   Filler
 );
 
-const DynamicCharts = () => {
+const DynamicCharts = ({ uploadedFileName }) => {
   const [chartConfigs, setChartConfigs] = useState([]);
   const [error, setError] = useState('');
 
-  // Fetch chart configurations from the API
   useEffect(() => {
     const fetchChartConfigs = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:5000/visualizations/charts');
+        console.log('Fetching charts for file:', uploadedFileName); // Debug log
+        
+        const response = await axios.post('http://127.0.0.1:5000/visualizations/charts', 
+          { file_name: uploadedFileName },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            }
+          }
+        );
+        
+        console.log('Received response:', response.data); // Debug log
+        
+        if (response.data.error) {
+          setError(response.data.error);
+          return;
+        }
+        
+        if (!response.data.chart_configs) {
+          setError('No chart configurations received from server');
+          return;
+        }
+        
         setChartConfigs(response.data.chart_configs);
+        setError('');
       } catch (err) {
-        setError('Failed to fetch chart configurations');
+        console.error('Error fetching charts:', err); // Debug log
+        setError(`Failed to fetch chart configurations: ${err.message}`);
       }
     };
 
-    fetchChartConfigs();
-  }, []);
+    if (uploadedFileName) {
+      fetchChartConfigs();
+    }
+  }, [uploadedFileName]);
 
-  // Render charts dynamically based on the configurations
   const renderChart = (config, index) => {
     const { chart_type, data, options, insights } = config;
+    
+    console.log(`Rendering ${chart_type} chart with data:`, data); // Debug log
 
     switch (chart_type) {
       case 'Bar':
         return (
-          <div key={index} style={{ marginBottom: '2rem' }}>
-            <h3>Bar Chart</h3>
+          <Card key={index} title="Bar Chart" insights={insights}>
             <Bar data={data} options={options} />
-            <p>{insights}</p>
-          </div>
+          </Card>
         );
       case 'Pie':
         return (
-          <div key={index} style={{ marginBottom: '2rem' }}>
-            <h3>Pie Chart</h3>
+          <Card key={index} title="Pie Chart" insights={insights}>
             <Pie data={data} options={options} />
-            <p>{insights}</p>
-          </div>
+          </Card>
         );
       case 'Line':
         return (
-          <div key={index} style={{ height: '400px', width: '100%', position: 'relative' }}>
-            <h3>Line Chart</h3>
+          <Card key={index} title="Line Chart" insights={insights}>
             <Line data={data} options={options} />
-            <p>{insights}</p>
-          </div>
+          </Card>
         );
       default:
         return (
           <div key={index}>
-            <p>Unsupported chart type: {chart_type}</p>
+            <p className="text-red-500">Unsupported chart type: {chart_type}</p>
           </div>
         );
     }
   };
 
+  
+
   return (
-    <div>
-      <h1>Dynamic Charts</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {chartConfigs.length === 0 && !error && <p>Loading charts...</p>}
-      {chartConfigs.map((config, index) => renderChart(config, index))}
+    <div className="p-8">
+      <h1 className="text-2xl font-bold mb-6 text-white">Dynamic Charts</h1>
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+      {chartConfigs.length === 0 && !error && (
+        <p className="text-gray-600">Loading charts...</p>
+      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {chartConfigs.map((config, index) => renderChart(config, index))}
+      </div>
     </div>
   );
 };

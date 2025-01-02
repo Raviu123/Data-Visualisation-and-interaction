@@ -8,10 +8,12 @@ import google.generativeai as genai
 
 visualization_blueprint = Blueprint('visualizations',__name__)
 
+uploads = os.path.join(os.getcwd(), 'backend', 'uploads') #defining the upload folder path-----------for now we are going to retreve data from here,later shift to database
+
 #load the csv from the data folder
-csv_path = os.path.abspath("../data/sample_data/sales_data.csv")
-df = pd.read_csv(csv_path)
-schema = [{"name": col, "type": str(df[col].dtype)} for col in df.columns]
+#csv_path = os.path.abspath("../data/sample_data/sales_data.csv")
+#df = pd.read_csv(csv_path)
+#schema = [{"name": col, "type": str(df[col].dtype)} for col in df.columns]
 
 
 def recommend_visualizations(schema):
@@ -327,43 +329,72 @@ def create_chart_configs(recommendation, df):
 
     return chart_configs
 
-def process_csv_and_get_charts(recommendation):
-    """
-    Main function to process CSV and generate chart configurations
-    """
+"""def process_csv_and_get_charts(recommendation):
+    
     # Ensure columns are clean
     df.columns = df.columns.str.strip()
     
     # Generate chart configurations
     chart_configs = create_chart_configs(recommendation, df)
     
-    return chart_configs
+    return chart_configs"""
 
-@visualization_blueprint.route('/predict', methods=['GET'])
+
+
+
+"""@visualization_blueprint.route('/predict', methods=['GET'])
 def predict():
-    """
-    Route to predict visualizations based on the CSV file.
-    """
+    
     try:
         predictions = recommend_visualizations(schema)
         return jsonify({"visualizations": predictions}), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(e)}), 500"""
+
+
     
-@visualization_blueprint.route('/charts', methods=['GET'])
+@visualization_blueprint.route('/charts', methods=['POST'])
 def generate_charts():
-    """
-    Route to generate chart configurations based on LLM recommendations and dataset.
-    """
     try:
-        # Get LLM visualization recommendations
+        # Get file name from request
+        request_data = request.get_json()
+        if not request_data:
+            print("No JSON data in request")  # Debug print
+            return jsonify({"error": "No data provided"}), 400
+        
+        file_name = request_data.get('file_name')
+        if not file_name:
+            print("No file_name in request data")  # Debug print
+            return jsonify({"error": "File name is required"}), 400
+
+        # Use same upload folder as defined in Upload_blueprint
+        file_path = os.path.join(os.getcwd(), 'uploads', file_name)
+        print(f"Looking for file at: {file_path}")  # Debug print
+
+        if not os.path.exists(file_path):
+            print(f"File not found at: {file_path}")  # Debug print
+            return jsonify({"error": f"File {file_name} not found"}), 404
+
+        # Load the CSV file
+        df = pd.read_csv(file_path)
+        print(f"Successfully loaded file with {len(df)} rows")  # Debug print
+
+        # Generate schema and recommendations
+        schema = [{"name": col, "type": str(df[col].dtype)} for col in df.columns]
         recommendations = recommend_visualizations(schema)
         
-        # Process the dataset and generate chart configurations
-        chart_configs = process_csv_and_get_charts(recommendations)
-        
-        # Return the chart configurations as a JSON response
+        if not recommendations.get('visualizations'):
+            print("No visualizations recommended")  # Debug print
+            return jsonify({"error": "No visualizations could be generated"}), 500
+
+        # Create chart configs
+        chart_configs = create_chart_configs(recommendations, df)
+        if not chart_configs:
+            print("No chart configs created")  # Debug print
+            return jsonify({"error": "Failed to create chart configurations"}), 500
+
         return jsonify({"chart_configs": chart_configs}), 200
+
     except Exception as e:
-        # Handle errors and send appropriate error messages
-        return jsonify({"error": str(e)}), 500
+        print(f"Error in generate_charts: {str(e)}")  # Debug print
+        return jsonify({"error": f"Failed to generate charts: {str(e)}"}), 500
