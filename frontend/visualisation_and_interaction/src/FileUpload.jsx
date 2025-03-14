@@ -170,23 +170,21 @@ const FileUpload = ({ onGenerateCharts }) => {
           </button>
 
           {uploadedFileId && (
-            <button
-              onClick={() => onGenerateCharts(uploadedFileId)}
-              className="w-full max-w-md py-3 rounded-md bg-green-600 hover:bg-green-700 font-medium transition-colors duration-200"
-            >
-              Generate Charts
-            </button>
+            <div className="flex gap-4 w-full max-w-md">
+              <button
+                onClick={() => onGenerateCharts(uploadedFileId)}
+                className="flex-1 py-3 rounded-md bg-green-600 hover:bg-green-700 font-medium transition-colors duration-200"
+              >
+                Generate Charts
+              </button>
+              <button
+                onClick={handleChatClick}
+                className="flex-1 py-3 rounded-md bg-blue-600 hover:bg-blue-700 font-medium transition-colors duration-200"
+              >
+                Chat with AI
+              </button>
+            </div>
           )}
-        </div>
-
-        {/* Chat with AI Button */}
-        <div className="max-w-md mx-auto">
-          <button
-            onClick={handleChatClick}
-            className="w-full py-3 rounded-md bg-blue-600 hover:bg-blue-700 font-medium transition-colors duration-200"
-          >
-            Chat with AI
-          </button>
         </div>
 
         {/* History Section */}

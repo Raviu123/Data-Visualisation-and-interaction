@@ -375,78 +375,57 @@ def predict():
 @visualization_blueprint.route('/charts', methods=['POST'])
 def generate_charts():
     try:
-        # Debugging incoming request
-        print(f"Received request: {request.json}")
-        
-        request_data = request.get_json()
-        if not request_data:
-            return jsonify({"error": "No data provided"}), 400
+        data = request.json
+        file_id = data.get('file_id')
+        user_id = data.get('user_id')
 
-        file_id = request_data.get('file_id')
-        if not file_id:
-            return jsonify({"error": "file_id is required"}), 400
+        if not file_id or not user_id:
+            return jsonify({'error': 'Missing file_id or user_id'}), 400
 
-        print(f"Fetching file with ID: {file_id}")
+        # First check file metadata
+        file_metadata = mongo.db.file_metadata.find_one({
+            "file_id": file_id,
+            "user_id": user_id
+        })
+
+        if not file_metadata:
+            return jsonify({'error': 'File not found or unauthorized access'}), 403
 
         # Initialize GridFS
         fs = gridfs.GridFS(mongo.db)
         
-        # Retrieve file metadata
-        metadata = mongo.db.file_metadata.find_one({"file_id": file_id})
-        if not metadata:
-            return jsonify({"error": f"File with ID {file_id} not found"}), 404
+        try:
+            # Get file from GridFS using the string ID from metadata
+            file_obj = fs.get(ObjectId(file_id))
+        except Exception as e:
+            print(f"GridFS Error: {str(e)}")
+            return jsonify({'error': 'File not found in storage'}), 404
 
-        # Retrieve file from GridFS
-        file_record = fs.get(ObjectId(file_id))
-        file_content = file_record.read()
+        # Read the file content
+        file_content = file_obj.read()
         
-        # Convert to DataFrame based on file type
-        if metadata['file_type'] == '.csv':
+        try:
+            # Convert bytes to DataFrame
             df = pd.read_csv(io.BytesIO(file_content))
-        elif metadata['file_type'] in ['.xls', '.xlsx']:
-            df = pd.read_excel(io.BytesIO(file_content))
-        else:
-            return jsonify({"error": "Unsupported file type"}), 400
-
-        print(f"Successfully loaded file with {len(df)} rows")
-
-        #------------old way of retreving data --------------
-        # Retrieve file data from MongoDB
-        #file_data = mongo.db.files.find_one({"_id": ObjectId(file_id)})
-        #if not file_data:
-         #   return jsonify({"error": f"File with ID {file_id} not found"}), 404
-
-        # Load data into a DataFrame
-        #df = pd.DataFrame(file_data["data"])
-        #print(f"Successfully loaded file with {len(df)} rows")  # Debug print
-
-        # Generate schema and recommendations
+        except Exception as e:
+            print(f"DataFrame Error: {str(e)}")
+            return jsonify({'error': 'Error reading file content'}), 500
+        
+        # Get schema for visualization recommendations
         schema = [{"name": col, "type": str(df[col].dtype)} for col in df.columns]
+        
+        # Get visualization recommendations
         recommendations = recommend_visualizations(schema)
-
-        if not recommendations.get('visualizations'):
-            return jsonify({"error": "No visualizations could be generated"}), 500
-
-        # Create chart configs
+        
+        # Create chart configurations
         chart_configs = create_chart_configs(recommendations, df)
-        if not chart_configs:
-            return jsonify({"error": "Failed to create chart configurations"}), 500
-
-        # Prepare data for MongoDB insertion
-        config_entry = {
-            "file_name":"sales3",
-            "data_id": file_id, 
-            "user_id":"67864b33172ed56267fgh1e", # To track which dataset this config belongs to
-            "chart_configs": chart_configs,
-            
-        }
-
-        # Insert the config into MongoDB
-        config_id = mongo.db.visualisation_configs.insert_one(config_entry).inserted_id 
-        print("config inserted",config_id)
-
-        return jsonify({"chart_configs": chart_configs}), 200
+        
+        return jsonify({
+            'success': True,
+            'chart_configs': chart_configs,
+            'user_id': user_id
+        })
 
     except Exception as e:
-        print(f"Error in generate_charts: {str(e)}")  # Debug print
-        return jsonify({"error": f"Failed to generate charts: {str(e)}"}), 500
+        print(f"Error in generate_charts: {str(e)}")
+        return jsonify({'error': str(e)}), 500

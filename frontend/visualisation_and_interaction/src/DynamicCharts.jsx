@@ -24,63 +24,99 @@ const DynamicCharts = ({ uploadedFileId }) => {
   const chartRefs = useRef([]);
   const [error, setError] = useState('');
   const [chartConfigs, setChartConfigs] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const currentUserId = Cookies.get('userId');
+  const fetchTimeoutRef = useRef(null);
 
-  
-  // Log mount/unmount for debugging
+  // Cache management
+  const cacheKey = useMemo(() => 
+    `chartConfigs_${currentUserId}_${uploadedFileId}`,
+    [currentUserId, uploadedFileId]
+  );
+
+  // Load chart configs from sessionStorage with user validation
   useEffect(() => {
-    console.log('DynamicCharts mounted for file:', uploadedFileId);
-    return () => console.log('DynamicCharts unmounted for file:', uploadedFileId);
-  }, []);
-
- // Load chart configs from sessionStorage
-useEffect(() => {
-  const loadConfigs = () => {
-    const userId = Cookies.get('userId');
-    const storageKey = `chartConfigs_${userId}_${uploadedFileId}`;
-    const savedConfigs = sessionStorage.getItem(storageKey);
-    if (savedConfigs) {
-      try {
-        setChartConfigs(JSON.parse(savedConfigs));
-      } catch (error) {
-        console.error('Error parsing stored chartConfigs:', error);
+    const loadConfigs = () => {
+      if (!currentUserId || !uploadedFileId) {
         setChartConfigs([]);
+        setIsLoading(false);
+        return;
       }
-    } else {
-      setChartConfigs([]);
-    }
-  };
-  loadConfigs();
-}, [uploadedFileId]);
 
-// Fetch chart configs from server if not already loaded
-useEffect(() => {
+      setIsLoading(true);
+      const savedConfigs = sessionStorage.getItem(cacheKey);
+
+      if (savedConfigs) {
+        try {
+          const parsedData = JSON.parse(savedConfigs);
+          // Validate that the stored data belongs to the current user
+          if (parsedData.userId === currentUserId) {
+            setChartConfigs(parsedData.charts);
+            setIsLoading(false);
+            return; // Don't fetch if we have valid cached data
+          } else {
+            // Clear invalid data
+            sessionStorage.removeItem(cacheKey);
+          }
+        } catch (error) {
+          console.error('Error parsing stored chartConfigs:', error);
+          sessionStorage.removeItem(cacheKey);
+        }
+      }
+      
+      // If we reach here, we need to fetch data
+      fetchChartConfigs();
+    };
+
+    loadConfigs();
+
+    // Cleanup function
+    return () => {
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+      }
+    };
+  }, [uploadedFileId, currentUserId, cacheKey]);
+
+  // Fetch chart configs from server
   const fetchChartConfigs = async () => {
-    // Only fetch if no configs are loaded
-    if (!uploadedFileId || chartConfigs.length > 0) return;
-    const userId = Cookies.get('userId');
-    if (!userId) return; // Exit if no logged-in user
+    if (!uploadedFileId || !currentUserId) return;
 
     try {
       console.log('Fetching charts for file:', uploadedFileId);
       const response = await axios.post(
         'http://127.0.0.1:5000/visualizations/charts',
-        { file_id: uploadedFileId },
-        { headers: { 'Content-Type': 'application/json' } }
+        { 
+          file_id: uploadedFileId,
+          user_id: currentUserId 
+        },
+        { 
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Cookies.get('token')}`
+          } 
+        }
       );
+
       if (response.data.chart_configs) {
+        const chartData = {
+          userId: currentUserId,
+          timestamp: new Date().toISOString(),
+          charts: response.data.chart_configs
+        };
+        
         setChartConfigs(response.data.chart_configs);
-        const storageKey = `chartConfigs_${userId}_${uploadedFileId}`;
-        sessionStorage.setItem(storageKey, JSON.stringify(response.data.chart_configs));
+        sessionStorage.setItem(cacheKey, JSON.stringify(chartData));
       } else {
         setError('No chart configurations received from server');
       }
     } catch (err) {
       console.error('Error fetching charts:', err);
       setError(`Failed to fetch chart configurations: ${err.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
-  fetchChartConfigs();
-}, [uploadedFileId, chartConfigs]);
 
   // Handle chart download
   const handleDownload = (chartRef, index) => {
@@ -106,7 +142,7 @@ useEffect(() => {
     const { chart_type, data, options, insights } = config;
     const chartOptions = {
       ...options,
-      animation: false, // Disable animations for faster rendering
+      animation: false,
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
@@ -191,8 +227,8 @@ useEffect(() => {
   };
 
   return (
-    <div className=" p-8 h-screen overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-      <div className=" mb-6 flex justify-between items-center pl-10 pr-10">
+    <div className="grid-container">
+      <div className="mb-6 flex justify-between items-center">
         <h1 className="text-2xl font-bold text-white">Dynamic Charts</h1>
         <button
           onClick={handleCreateReport}
@@ -200,14 +236,19 @@ useEffect(() => {
         >
           Create Report
         </button>
-      </div >
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      {chartConfigs.length === 0 && !error && (
-        <p className="text-gray-600">Loading charts...</p>
-      )}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 ">
-        {chartComponents}
       </div>
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      ) : chartConfigs.length === 0 && !error ? (
+        <p className="text-gray-600 text-center">No charts available</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {chartComponents}
+        </div>
+      )}
     </div>
   );
 };

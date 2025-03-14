@@ -84,10 +84,21 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
+    // Clear all chart-related session storage
+    Object.keys(sessionStorage).forEach(key => {
+      if (key.startsWith('chartConfigs_')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+    
+    // Clear cookies
     Cookies.remove("userToken");
     Cookies.remove("userEmail");
     Cookies.remove("userId");
+    
+    // Clear any remaining session storage
     sessionStorage.clear();
+    
     setUserbtntext("A");
     setIsloggedin(false);
     alert("Logged out successfully");
