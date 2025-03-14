@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import axios from 'axios';
 import { Bar, Pie, Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, BarElement, ArcElement, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
-import Card from './Card'
+import Card from './Card';
+import { Link, useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -16,73 +19,138 @@ ChartJS.register(
   Filler
 );
 
-const DynamicCharts = ({ uploadedFileName }) => {
-  const [chartConfigs, setChartConfigs] = useState([]);
+const DynamicCharts = ({ uploadedFileId }) => {
+  const navigate = useNavigate();
+  const chartRefs = useRef([]);
   const [error, setError] = useState('');
+  const [chartConfigs, setChartConfigs] = useState([]);
 
+  
+  // Log mount/unmount for debugging
   useEffect(() => {
-    const fetchChartConfigs = async () => {
+    console.log('DynamicCharts mounted for file:', uploadedFileId);
+    return () => console.log('DynamicCharts unmounted for file:', uploadedFileId);
+  }, []);
+
+ // Load chart configs from sessionStorage
+useEffect(() => {
+  const loadConfigs = () => {
+    const userId = Cookies.get('userId');
+    const storageKey = `chartConfigs_${userId}_${uploadedFileId}`;
+    const savedConfigs = sessionStorage.getItem(storageKey);
+    if (savedConfigs) {
       try {
-        console.log('Fetching charts for file:', uploadedFileName); // Debug log
-        
-        const response = await axios.post('http://127.0.0.1:5000/visualizations/charts', 
-          { file_name: uploadedFileName },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            }
-          }
-        );
-        
-        console.log('Received response:', response.data); // Debug log
-        
-        if (response.data.error) {
-          setError(response.data.error);
-          return;
-        }
-        
-        if (!response.data.chart_configs) {
-          setError('No chart configurations received from server');
-          return;
-        }
-        
-        setChartConfigs(response.data.chart_configs);
-        setError('');
-      } catch (err) {
-        console.error('Error fetching charts:', err); // Debug log
-        setError(`Failed to fetch chart configurations: ${err.message}`);
+        setChartConfigs(JSON.parse(savedConfigs));
+      } catch (error) {
+        console.error('Error parsing stored chartConfigs:', error);
+        setChartConfigs([]);
       }
-    };
-
-    if (uploadedFileName) {
-      fetchChartConfigs();
+    } else {
+      setChartConfigs([]);
     }
-  }, [uploadedFileName]);
+  };
+  loadConfigs();
+}, [uploadedFileId]);
 
+// Fetch chart configs from server if not already loaded
+useEffect(() => {
+  const fetchChartConfigs = async () => {
+    // Only fetch if no configs are loaded
+    if (!uploadedFileId || chartConfigs.length > 0) return;
+    const userId = Cookies.get('userId');
+    if (!userId) return; // Exit if no logged-in user
+
+    try {
+      console.log('Fetching charts for file:', uploadedFileId);
+      const response = await axios.post(
+        'http://127.0.0.1:5000/visualizations/charts',
+        { file_id: uploadedFileId },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+      if (response.data.chart_configs) {
+        setChartConfigs(response.data.chart_configs);
+        const storageKey = `chartConfigs_${userId}_${uploadedFileId}`;
+        sessionStorage.setItem(storageKey, JSON.stringify(response.data.chart_configs));
+      } else {
+        setError('No chart configurations received from server');
+      }
+    } catch (err) {
+      console.error('Error fetching charts:', err);
+      setError(`Failed to fetch chart configurations: ${err.message}`);
+    }
+  };
+  fetchChartConfigs();
+}, [uploadedFileId, chartConfigs]);
+
+  // Handle chart download
+  const handleDownload = (chartRef, index) => {
+    const chartInstance = chartRef.current[index];
+    if (chartInstance) {
+      const canvas = chartInstance.canvas;
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-over';
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const url = canvas.toDataURL('image/jpeg', 1.0);
+      ctx.restore();
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `chart-${index}.jpg`;
+      link.click();
+    }
+  };
+
+  // Render individual charts
   const renderChart = (config, index) => {
     const { chart_type, data, options, insights } = config;
-    
-    console.log(`Rendering ${chart_type} chart with data:`, data); // Debug log
+    const chartOptions = {
+      ...options,
+      animation: false, // Disable animations for faster rendering
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        ...options.plugins,
+        backgroundColor: 'white',
+      },
+      layout: {
+        padding: 20,
+      },
+    };
+
+    const ChartWrapper = ({ children }) => (
+      <Card key={index} insights={insights} className="relative">
+        <div className="flex justify-between items-center">
+          <h3 className="text-xl font-bold">{`${chart_type} Chart`}</h3>
+          <button
+            onClick={() => handleDownload(chartRefs, index)}
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Download Chart
+          </button>
+        </div>
+        {children}
+      </Card>
+    );
 
     switch (chart_type) {
       case 'Bar':
         return (
-          <Card key={index} title="Bar Chart" insights={insights}>
-            <Bar data={data} options={options} />
-          </Card>
+          <ChartWrapper>
+            <Bar data={data} options={chartOptions} ref={(el) => (chartRefs.current[index] = el)} />
+          </ChartWrapper>
         );
       case 'Pie':
         return (
-          <Card key={index} title="Pie Chart" insights={insights}>
-            <Pie data={data} options={options} />
-          </Card>
+          <ChartWrapper>
+            <Pie data={data} options={chartOptions} ref={(el) => (chartRefs.current[index] = el)} />
+          </ChartWrapper>
         );
       case 'Line':
         return (
-          <Card key={index} title="Line Chart" insights={insights}>
-            <Line data={data} options={options} />
-          </Card>
+          <ChartWrapper>
+            <Line data={data} options={chartOptions} ref={(el) => (chartRefs.current[index] = el)} />
+          </ChartWrapper>
         );
       default:
         return (
@@ -93,17 +161,52 @@ const DynamicCharts = ({ uploadedFileName }) => {
     }
   };
 
-  
+  // Memoize chart components to prevent unnecessary re-renders
+  const chartComponents = useMemo(() => 
+    chartConfigs.map((config, index) => renderChart(config, index)),
+    [chartConfigs]
+  );
+
+  // Handle report creation
+  const handleCreateReport = () => {
+    const chartImages = chartRefs.current
+      .map((chartRef, index) => {
+        if (chartRef) {
+          const canvas = chartRef.canvas;
+          const ctx = canvas.getContext('2d');
+          ctx.save();
+          ctx.globalCompositeOperation = 'destination-over';
+          ctx.fillStyle = 'white';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          return {
+            index,
+            imageUrl: canvas.toDataURL('image/jpeg', 1.0),
+            config: chartConfigs[index],
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
+    navigate('/report', { state: { chartImages, fileId: uploadedFileId } });
+  };
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6 text-white">Dynamic Charts</h1>
+    <div className=" p-8 h-screen overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+      <div className=" mb-6 flex justify-between items-center pl-10 pr-10">
+        <h1 className="text-2xl font-bold text-white">Dynamic Charts</h1>
+        <button
+          onClick={handleCreateReport}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Create Report
+        </button>
+      </div >
       {error && <p className="text-red-500 mb-4">{error}</p>}
       {chartConfigs.length === 0 && !error && (
         <p className="text-gray-600">Loading charts...</p>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {chartConfigs.map((config, index) => renderChart(config, index))}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 ">
+        {chartComponents}
       </div>
     </div>
   );

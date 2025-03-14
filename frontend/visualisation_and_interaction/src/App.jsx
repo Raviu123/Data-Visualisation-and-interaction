@@ -1,33 +1,27 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import DynamicCharts from './DynamicCharts'
-import LandingPage from './LandingPage'
-import FileUpload from './FileUpload'
-import './App.css'
-import './index.css';
+import React, { Suspense } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AliveScope } from 'react-activation';
+import Homepage from './pages/Homepage';
+import ReportPage from './pages/ReportPage';
+import LandingPage from './pages/LandingPage';
+import ChatPage from './pages/ChatPage';
 
-function App() {
-  const [count, setCount] = useState(0)
-  const [uploadedFileName, setUploadedFileName] = useState(null);
-
-    const handleGenerateCharts = (filename) => {
-        setUploadedFileName(filename);
-    };
-
+const App = () => {
   return (
-    <>
-      <div className="flex h-full bg-blue-950">
-        <div className='w-1/5 border-r-2'>
-          <FileUpload onGenerateCharts={handleGenerateCharts}></FileUpload>
-        </div>
-        <div className="w-4/5">
-          <DynamicCharts uploadedFileName={uploadedFileName}/>
-        </div>
-      </div>
-      
-    </>
-  )
-}
+    <Router>
+      <AliveScope>
+        <Suspense fallback={<div>Loading...</div>}>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/home" element={<Homepage key="home" />} />
+            <Route path="/report" element={<ReportPage />} />
+            <Route path="/chat" element={<ChatPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </AliveScope>
+    </Router>
+  );
+};
 
-export default App
+export default App;
