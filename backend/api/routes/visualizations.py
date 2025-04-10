@@ -405,8 +405,16 @@ def generate_charts():
         file_content = file_obj.read()
         
         try:
-            # Convert bytes to DataFrame
-            df = pd.read_csv(io.BytesIO(file_content))
+            # Detect file type and read accordingly
+            if file_metadata.get('filename', '').endswith('.xlsx'):
+                # Handle Excel files
+                df = pd.read_excel(io.BytesIO(file_content), engine='openpyxl')
+            elif file_metadata.get('filename', '').endswith('.csv'):
+                # Handle CSV files
+                df = pd.read_csv(io.BytesIO(file_content))
+            else:
+                return jsonify({'error': 'Unsupported file format'}), 400
+            
         except Exception as e:
             print(f"DataFrame Error: {str(e)}")
             return jsonify({'error': 'Error reading file content'}), 500
