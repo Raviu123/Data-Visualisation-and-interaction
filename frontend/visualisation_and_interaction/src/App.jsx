@@ -4,6 +4,7 @@ import Homepage from './pages/Homepage';
 import LandingPage from './pages/LandingPage';
 import ChatPage from './pages/ChatPage';
 import ReportPage from './pages/ReportPage';
+import UploadsPage from './pages/UploadsPage';
 import './App.css';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
             <Route path="/home" element={<Homepage />} />
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/report" element={<ReportPage />} />
+            <Route path="/uploads" element={<UploadsPage />} />
           </Routes>
         </main>
       </div>

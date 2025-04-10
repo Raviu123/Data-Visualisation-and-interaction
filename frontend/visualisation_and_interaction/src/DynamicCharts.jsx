@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Bar, Pie, Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, BarElement, ArcElement, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import Card from './Card';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
 ChartJS.register(
@@ -27,6 +27,17 @@ const DynamicCharts = ({ uploadedFileId }) => {
   const [isLoading, setIsLoading] = useState(true);
   const currentUserId = Cookies.get('userId');
   const fetchTimeoutRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  // Handle responsive layout detection
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Cache management
   const cacheKey = useMemo(() => 
@@ -148,24 +159,72 @@ const DynamicCharts = ({ uploadedFileId }) => {
       plugins: {
         ...options.plugins,
         backgroundColor: 'white',
+        legend: {
+          ...options.plugins?.legend,
+          display: true,
+          labels: {
+            ...options.plugins?.legend?.labels,
+            font: {
+              size: isMobile ? 10 : 12
+            }
+          }
+        },
+        title: {
+          ...options.plugins?.title,
+          font: {
+            size: isMobile ? 14 : 16
+          }
+        },
+        tooltip: {
+          ...options.plugins?.tooltip,
+          bodyFont: {
+            size: isMobile ? 10 : 12
+          },
+          titleFont: {
+            size: isMobile ? 12 : 14
+          }
+        }
       },
       layout: {
-        padding: 20,
+        padding: isMobile ? 10 : 20,
       },
+      scales: options.scales ? {
+        ...options.scales,
+        x: {
+          ...options.scales.x,
+          ticks: {
+            ...options.scales.x?.ticks,
+            font: {
+              size: isMobile ? 10 : 12
+            }
+          }
+        },
+        y: {
+          ...options.scales.y,
+          ticks: {
+            ...options.scales.y?.ticks,
+            font: {
+              size: isMobile ? 10 : 12
+            }
+          }
+        }
+      } : undefined
     };
 
     const ChartWrapper = ({ children }) => (
       <Card key={index} insights={insights} className="relative">
-        <div className="flex justify-between items-center">
-          <h3 className="text-xl font-bold">{`${chart_type} Chart`}</h3>
+        <div className="flex justify-between items-center flex-wrap gap-2">
+          <h3 className={`${isMobile ? 'text-lg' : 'text-xl'} font-bold`}>{`${chart_type} Chart`}</h3>
           <button
             onClick={() => handleDownload(chartRefs, index)}
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+            className={`bg-green-500 hover:bg-green-700 text-white font-bold ${isMobile ? 'py-1 px-3 text-sm' : 'py-2 px-4'} rounded`}
           >
             Download Chart
           </button>
         </div>
-        {children}
+        <div className={isMobile ? 'h-64' : 'h-80'}>
+          {children}
+        </div>
       </Card>
     );
 
@@ -200,7 +259,7 @@ const DynamicCharts = ({ uploadedFileId }) => {
   // Memoize chart components to prevent unnecessary re-renders
   const chartComponents = useMemo(() => 
     chartConfigs.map((config, index) => renderChart(config, index)),
-    [chartConfigs]
+    [chartConfigs, isMobile]
   );
 
   // Handle report creation
@@ -227,25 +286,25 @@ const DynamicCharts = ({ uploadedFileId }) => {
   };
 
   return (
-    <div className="grid-container">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-white">Dynamic Charts</h1>
+    <div className="p-3 md:p-4">
+      <div className="mb-4 md:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <h1 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-white`}>Dynamic Charts</h1>
         <button
           onClick={handleCreateReport}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className={`${isMobile ? 'text-sm py-2' : 'py-2'} w-full sm:w-auto bg-blue-500 hover:bg-blue-700 text-white font-bold px-4 rounded`}
         >
           Create Report
         </button>
       </div>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
+      {error && <p className="text-red-500 mb-3 md:mb-4 text-sm md:text-base">{error}</p>}
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       ) : chartConfigs.length === 0 && !error ? (
-        <p className="text-gray-600 text-center">No charts available</p>
+        <p className="text-gray-400 text-center py-12">No charts available</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {chartComponents}
         </div>
       )}

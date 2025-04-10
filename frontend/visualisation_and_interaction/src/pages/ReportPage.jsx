@@ -208,18 +208,18 @@ const ReportPage = () => {
   return (
     <>
       <Navbar />
-      <div className="fixed top-20 left-3">
+      <div className="fixed top-20 left-3 z-10">
         <Link to={`/home?file_id=${fileId}`}>
           <button className="bg-blue-600 text-white rounded-lg px-3 py-1.5 hover:bg-blue-500 transition-colors text-sm font-medium shadow-sm">
             Back to Home
           </button>
         </Link>
       </div>
-      <div className="mt-14 flex h-screen bg-gray-900">
+      <div className="mt-14 flex flex-col lg:flex-row min-h-screen bg-gray-900">
         {/* Left Side - Report Creation */}
-        <div className="mt-14 w-1/2 p-6 flex flex-col space-y-4 border-r border-blue-800">
-          <div className="bg-blue-900/50 rounded-lg p-6 h-32 backdrop-blur-sm">
-            <div className="flex gap-4 flex-wrap">
+        <div className="w-full lg:w-1/2 p-4 lg:p-6 flex flex-col space-y-4 border-b lg:border-r lg:border-b-0 border-blue-800">
+          <div className="bg-blue-900/50 rounded-lg p-4 lg:p-6 h-auto lg:h-32 backdrop-blur-sm">
+            <div className="flex flex-wrap gap-4">
               {chartImages &&
                 chartImages.map((chartImage, index) => (
                   <div
@@ -237,37 +237,39 @@ const ReportPage = () => {
                 ))}
             </div>
           </div>
-          <div className="flex gap-3">
-            <div className="bg-blue-900/30 flex justify-center items-center text-blue-100 rounded-lg p-1 h-40 w-4/5 cursor-pointer hover:bg-blue-800/40 transition-colors text-center border border-blue-800/50 backdrop-blur-sm text-sm">
+          <div className="flex flex-col lg:flex-row gap-3">
+            <div className="bg-blue-900/30 flex-1 flex justify-center items-center text-blue-100 rounded-lg p-4 h-40 cursor-pointer hover:bg-blue-800/40 transition-colors text-center border border-blue-800/50 backdrop-blur-sm">
               <div
-                className="text-blue-100/70 text-sm overflow-hidden h-32 w-1/2"
+                className="text-blue-100/70 text-sm w-full h-full"
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
               >
                 {selectedCharts.length === 0 ? (
-                  <p>Drag and drop chart for analysis.</p>
+                  <p>Drag and drop chart for analysis</p>
                 ) : (
-                  selectedCharts.map(({ chartImage, chartIndex }) => (
-                    <div key={chartIndex}>
-                      <img
-                        src={chartImage.imageUrl}
-                        alt={`${chartImage.config.chart_type} Chart`}
-                        className="w-full h-full object-scale-down"
-                      />
-                    </div>
-                  ))
+                  <div className="grid grid-cols-2 gap-2">
+                    {selectedCharts.map(({ chartImage, chartIndex }) => (
+                      <div key={chartIndex} className="relative">
+                        <img
+                          src={chartImage.imageUrl}
+                          alt={`${chartImage.config.chart_type} Chart`}
+                          className="w-full h-auto"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
             <button
               onClick={handleGenerate}
-              className="bg-blue-600 text-white rounded-lg px-4 py-2 w-64 hover:bg-blue-500 transition-colors text-sm font-medium shadow-sm"
+              className="w-full lg:w-auto bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-500 transition-colors text-sm font-medium shadow-sm"
             >
-              Generate
+              Generate Analysis
             </button>
           </div>
           <div className="bg-blue-900/30 rounded-lg p-4 border border-blue-800/50 backdrop-blur-sm">
-            <p className="text-blue-200 text-sm font-medium mb-2">AI Response</p>
+            <p className="text-blue-200 text-sm font-medium mb-2">AI Analysis</p>
             <div className="text-blue-100/70 text-sm">
               {isLoading ? (
                 <p>Analyzing charts...</p>
@@ -275,14 +277,12 @@ const ReportPage = () => {
                 <p className="text-red-400">{error}</p>
               ) : analysisResult ? (
                 <div className="max-h-60 overflow-y-auto">
-                  <div className="whitespace-pre-wrap">
-                    {analysisResult.map((analysis, index) => (
-                      <div key={index} className="mb-4">
-                        <p className="font-medium mb-1">Analysis {index + 1}:</p>
-                        <p>{analysis}</p>
-                      </div>
-                    ))}
-                  </div>
+                  {analysisResult.map((analysis, index) => (
+                    <div key={index} className="mb-4">
+                      <p className="font-medium mb-1">Analysis {index + 1}:</p>
+                      <p>{analysis}</p>
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <p>Drag and drop charts and click Generate to analyze them...</p>
@@ -291,27 +291,27 @@ const ReportPage = () => {
           </div>
           <button
             onClick={handleAdd}
-            className="bg-blue-600 text-white rounded-lg px-3 py-1.5 w-40 h-20 ml-auto hover:bg-blue-500 transition-colors text-sm font-medium shadow-sm"
+            className="w-full lg:w-40 bg-blue-600 text-white rounded-lg px-3 py-1.5 hover:bg-blue-500 transition-colors text-sm font-medium shadow-sm self-end"
           >
-            Add
+            Add to Report
           </button>
         </div>
+
         {/* Right Side - Report Preview */}
-        <div className="w-1/2 p-6 flex flex-col">
+        <div className="w-full lg:w-1/2 p-4 lg:p-6">
           <div
             ref={reportRef}
-            className="bg-white rounded-lg p-6 h-5/6 border border-blue-800/50 backdrop-blur-sm flex flex-col"
+            className="bg-white rounded-lg p-4 lg:p-6 min-h-[50vh] border border-blue-800/50 backdrop-blur-sm flex flex-col"
           >
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-gray-800">Data Analysis Report</h2>
-              
             </div>
             <div className="flex-1 overflow-y-auto">
               {reportContent.length > 0 ? (
                 <div className="space-y-8">
                   {reportContent.map((item, index) => (
-                    <div key={index} className="flex gap-6 pb-6 border-b border-gray-200">
-                      <div className="w-1/2">
+                    <div key={index} className="flex flex-col lg:flex-row gap-6 pb-6 border-b border-gray-200">
+                      <div className="w-full lg:w-1/2">
                         <div className="border border-gray-200 rounded-lg p-2 bg-white shadow-sm">
                           <img
                             src={item.chart.imageUrl}
@@ -323,10 +323,8 @@ const ReportPage = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="w-1/2 text-gray-700">
-                        <h3 className="font-medium text-md mb-2 text-gray-800">
-                          Analysis:
-                        </h3>
+                      <div className="w-full lg:w-1/2 text-gray-700">
+                        <h3 className="font-medium text-md mb-2">Analysis:</h3>
                         <p className="text-sm">{item.analysis}</p>
                       </div>
                     </div>
@@ -339,17 +337,17 @@ const ReportPage = () => {
               )}
             </div>
           </div>
-          <div className="flex justify-end mt-4 gap-2">
+          <div className="flex flex-col sm:flex-row justify-end mt-4 gap-2">
             {error && <p className="text-red-400 text-sm mr-auto self-center">{error}</p>}
             <button
               onClick={handleClearReport}
-              className="bg-red-600 text-white rounded-lg px-4 py-2 hover:bg-red-500 transition-colors text-sm font-medium shadow-sm"
+              className="w-full sm:w-auto bg-red-600 text-white rounded-lg px-4 py-2 hover:bg-red-500 transition-colors text-sm font-medium shadow-sm"
             >
               Clear Report
             </button>
             <button
               onClick={handleDownload}
-              className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-500 transition-colors text-sm font-medium shadow-sm flex items-center"
+              className="w-full sm:w-auto bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-500 transition-colors text-sm font-medium shadow-sm flex items-center justify-center"
             >
               <span>Download PDF</span>
             </button>

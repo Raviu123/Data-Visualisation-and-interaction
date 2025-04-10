@@ -11,6 +11,7 @@ const Navbar = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [userbtntext, setUserbtntext] = useState("A");
   const [isloggedin, setIsloggedin] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Check if a user is logged in on page load
   useEffect(() => {
@@ -107,33 +108,92 @@ const Navbar = () => {
 
   return (
     <>
-      <div className="fixed top-0 left-0 w-full z-50 flex justify-between items-center bg-gradient-to-r from-blue-800 to-blue-950 h-16 px-6 py-4 shadow-lg">
-        <h1 className="text-3xl font-extrabold text-white tracking-wide transform transition duration-300 hover:scale-105">
-          DataVisAI
-        </h1>
-        <div className="flex items-center text-white text-lg gap-3">
-          {/* Show navigation links only when NOT logged in */}
+      <div className="fixed top-0 left-0 w-full z-50 bg-gradient-to-r from-blue-800 to-blue-950 shadow-lg">
+        <div className="flex justify-between items-center h-16 px-4 md:px-6">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-wide transform transition duration-300 hover:scale-105">
+            DataVisAI
+          </h1>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden text-white p-2"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {isMobileMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center text-white text-lg gap-3">
+            {!isloggedin && (
+              <>
+                <Link to="/home" className="text-gray-400 hover:text-white mr-8">
+                  Home
+                </Link>
+                <Link to="/chat" className="text-gray-400 hover:text-white mr-8">
+                  Chat
+                </Link>
+                <Link to="/report" className="text-gray-400 hover:text-white mr-8">
+                  Reports
+                </Link>
+              </>
+            )}
+            <div
+              onClick={toggleloginBox}
+              className="bg-white h-10 w-10 rounded-full flex justify-center items-center shadow-xl transform transition duration-300 hover:scale-105 cursor-pointer"
+            >
+              <button className="text-sm font-semibold text-blue-950 hover:text-blue-600">
+                {userbtntext}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Navigation Menu */}
+        <div className={`md:hidden ${isMobileMenuOpen ? 'block' : 'hidden'} bg-blue-900`}>
           {!isloggedin && (
-            <>
-              <Link to="/home" className="text-gray-400 hover:text-white mr-8">
+            <div className="px-4 pt-2 pb-3 space-y-2">
+              <Link
+                to="/home"
+                className="block text-gray-300 hover:text-white hover:bg-blue-800 px-3 py-2 rounded-md text-base"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
                 Home
               </Link>
-              <Link to="/chat" className="text-gray-400 hover:text-white mr-8">
+              <Link
+                to="/chat"
+                className="block text-gray-300 hover:text-white hover:bg-blue-800 px-3 py-2 rounded-md text-base"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
                 Chat
               </Link>
-              <Link to="/report" className="text-gray-400 hover:text-white mr-8">
+              <Link
+                to="/report"
+                className="block text-gray-300 hover:text-white hover:bg-blue-800 px-3 py-2 rounded-md text-base"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
                 Reports
               </Link>
-            </>
+            </div>
           )}
-
-          <div
-            onClick={toggleloginBox}
-            className="bg-white h-10 w-10 rounded-full flex justify-center items-center shadow-xl transform transition duration-300 hover:scale-105 cursor-pointer"
-          >
-            <button className="text-sm font-semibold text-blue-950 hover:text-blue-600">
-              {userbtntext}
-            </button>
+          <div className="px-4 py-3 border-t border-blue-800">
+            <div
+              onClick={() => {
+                toggleloginBox();
+                setIsMobileMenuOpen(false);
+              }}
+              className="flex items-center"
+            >
+              <div className="bg-white h-8 w-8 rounded-full flex justify-center items-center">
+                <span className="text-sm font-semibold text-blue-950">{userbtntext}</span>
+              </div>
+              <span className="ml-3 text-white text-sm">{isloggedin ? 'Account' : 'Login/Signup'}</span>
+            </div>
           </div>
         </div>
       </div>
